@@ -1,138 +1,224 @@
-/* uniq command in Linux is a command-line utility that reports or lters out the repeated lines
-in a le. In simple words, uniq is the tool that helps to detect the adjacent duplicate lines and also
-deletes the duplicate lines. uniq lters out the adjacent matching lines from the input le(that is
-required as an argument) and writes the ltered data to the output le.*/
-/*-c
-  -i
-  -d*/
-
 #include "types.h"
-#include "stat.h"
 #include "user.h"
 
-char buf[5120000];
-char *args;
-int uniq(int fd, char *name)
+#define BUFFER_SIZE 1536
+
+/* function prototypes */
+void clear_arr(char *a, int size);
+int getstr(int fd, char *buf, int max);
+char toUpper(char lc);
+int stricmp(const char *p, const char *q);
+void error(char* str);
+void uniq_c(int fd, int i_switch);
+void uniq_d(int fd, int i_switch);
+void uniq_n(int fd, int i_switch);
+void uniq(int fd, int i_switch, int c_switch, int d_switch);
+
+void uniq(int fd, int i_switch, int c_switch, int d_switch)
 {
-	int final=0,k,p,q,index=0,m=0,l=0,b,n,i,count=0,count1 = 0; char pilot[10000];
-        char *output[10000];
-	int repeat[1000];
-	
- while((n = read(fd, buf, sizeof(buf))) > 0)
-
-        {        for(b=0; b<n; b++)
-		 {
-                     if(buf[b] == '\n')
-                          l++;
-                 }
-                for(i=0;buf[i]!='\n';i++)
-                {
-                        count++;
-                         pilot[i]=buf[i];
-                }
-           
-    	        pilot[i]='\0';
-		repeat[0]=1;
-                output[0]=(char*)malloc((count+1)*sizeof(char*));
-                for(i=0;i<count+1;i++)
-                {
-                output[index][i]=pilot[i];
-                }
-		output[index][i]='\0';
-                k=i;
-        while(final<l-1)
-	{
-		final++;
-        	count1=0;
-		for(i=k;buf[i]!='\n';i++)
-        	{
-			count1++;
-        		pilot[m++]=buf[i];
-        	}
-		pilot[m]='\0';
-		k=k+count1+1;
-		m=0;
-        	if(strcmp(output[index],pilot)!=0)
-		{
-			index = index + 1;
-			output[index]=(char*)malloc((count1+1)*sizeof(char*));
-			for(p=0;p<count1;p++)
-			{
-                		output[index][p]=pilot[p];
-			}
-			output[index][p]='\0';
-			repeat[index]=1;
-        	}
-		else
-		{
-			repeat[index]=repeat[index]+1;
-
-		}
-	}
-	}
-        if(strcmp(args,"-c")==0 || strcmp(args,"-C")==0 )
-	{
-		for(q=0;q<index+1;q++)
-                { 
-                        printf(1,"%d %s \n",repeat[q],output[q]);
-                }
-              }
-       else  if(strcmp(args,"-d")==0 || strcmp(args,"-D")==0 )
-	{
-	      for(q=0;q<index+1;q++)
-              {
-		if(repeat[q]>1)
-		{	
-              		printf(1,"%s \n",output[q]);
-		}
-	      }	
-        }
-	else
-	{
-	     for(q=0;q<index+1;q++)
-             {
-             	 printf(1,"%s \n",output[q]);
-              }
-
-	}
-	free(output); 
-        return 0;
+    if(c_switch)
+        uniq_c(fd, i_switch);
+    if(d_switch)
+        uniq_d(fd, i_switch);
+    if(!c_switch && !d_switch)
+        uniq_n(fd, i_switch);
 }
-int main(int argc, char **argv)
+
+void uniq_c(int fd, int i_switch)
 {
-  int fd, r;
-  if(argc <= 1)
-  {
-    uniq(0, "");
+    char mainstring[BUFFER_SIZE], backup[BUFFER_SIZE];
+    int count = 0, flag = 0;
+    int (*strcmp_f[])(const char *,const char*) = {&strcmp, &stricmp};
+
+    clear_arr(backup, BUFFER_SIZE);
+    clear_arr(mainstring, BUFFER_SIZE);
+    if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+        return;
+    strcpy(backup, mainstring);
+    while(1)
+    {
+        while((*strcmp_f[i_switch])(mainstring, backup) == 0)
+        {
+            clear_arr(mainstring, BUFFER_SIZE);
+            count++;
+            if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+            {
+                flag = 1;
+                break;
+            }
+        }
+        if(flag)
+        {
+            printf(1, "%d %s", count, backup);
+            return;
+        }
+        printf(1, "%d %s", count, backup);
+        count = 0;
+        strcpy(backup, mainstring);
+    }
+}
+
+void uniq_d(int fd, int i_switch)
+{
+    char mainstring[BUFFER_SIZE], backup[BUFFER_SIZE];
+    int flag = 0;
+    int (*strcmp_f[])(const char *,const char*) = {&strcmp, &stricmp};
+
+    clear_arr(backup, BUFFER_SIZE);
+    while(1)
+    {
+        clear_arr(mainstring, BUFFER_SIZE);
+        if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+            return;
+        if((*strcmp_f[i_switch])(mainstring, backup) != 0)
+            strcpy(backup, mainstring);
+        else
+        {
+            while((*strcmp_f[i_switch])(mainstring, backup) == 0)
+            {
+                clear_arr(mainstring, BUFFER_SIZE);
+                if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+                {
+                    flag = 1;
+                    break;
+                }
+            }
+            if(flag)
+            {
+                printf(1, "%s", backup);
+                return;
+            }
+            printf(1, "%s", backup);
+            strcpy(backup, mainstring);
+        }
+    }
+}
+
+void uniq_n(int fd, int i_switch)
+{
+    char mainstring[BUFFER_SIZE], backup[BUFFER_SIZE];
+    int (*strcmp_f[])(const char *,const char*) = {&strcmp, &stricmp};
+
+    clear_arr(backup, BUFFER_SIZE);
+    while(1)
+    {
+        clear_arr(mainstring, BUFFER_SIZE);
+        if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+            return;
+        while((*strcmp_f[i_switch])(mainstring, backup) == 0)
+        {
+            clear_arr(mainstring, BUFFER_SIZE);
+            if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+                return;
+        }
+        printf(1, "%s", mainstring);
+        strcpy(backup, mainstring);
+    }
+}
+
+int getstr(int fd, char *buf, int max)
+{
+    int i, cc;
+    char c;
+
+    for(i = 0; i + 1 < max; )
+    {
+        cc = read(fd, &c, 1);
+        if(cc < 1)
+        return -1;
+    buf[i++] = c;
+    if(c == '\n' || c == '\r')
+         break;
+    }
+
+    buf[i] = '\0';
+    return strlen(buf);
+}
+
+int stricmp(const char *p, const char *q)
+{
+    while(*p && toUpper(*p) == toUpper(*q))
+        p++, q++;
+    return (uchar)*p - (uchar)*q;
+}
+
+char toUpper(char lc)
+{
+    if(lc >= 'a' && lc <= 'z')
+        return lc - ('a' - 'A');
+    else
+        return lc;
+}
+
+void clear_arr(char *a, int size)
+{
+    int i;
+
+    for(i = 0; i < size; i++)
+        a[i] = '\0';
+}
+
+void error(char* str)
+{
+    printf(1, "Error: %s. Terminating\n", str);
     exit();
-  }
-  else if(argc == 2)
-  {
-  for(r = 1; r < argc; r++)
-  {
-    if((fd = open(argv[r], 0)) < 0)
+}
+
+int main (int argc, char *argv[])
+{
+    int fd, j, ckfl;
+    int i = 0, c = 0, d = 0;
+
+    for(j = 1; j < argc; j++)
     {
-      printf(1,"uniq: cannot open %s\n", argv[r]);
-      exit();
+        if(argv[j][0] == '-')
+        {
+            switch(argv[j][1])
+            {
+                case 'i':
+                    i = 1;
+                    break;
+                case 'd':
+                    d = 1;
+                    break;
+                case 'c':
+                    c = 1;
+                    break;
+                default:
+                    error("Unexpected option, this ain't legal, please try again");
+            }
+        }
     }
-    uniq(fd, argv[r]);
-    close(fd);
-  }
-  exit();
-  }
-  else
-  {
-    for(r = 2; r < argc; r++)
-  {
-    if((fd = open(argv[r], 0)) < 0)
+
+    for(j = 1, ckfl = 0; j < argc; j++)
     {
-      printf(1,"uniq: cannot open %s\n", argv[r]);
-      exit();
+        if(argv[j][0] != '-')
+        {
+            ckfl = 1;
+            break;
+        }
     }
-    args=argv[1];
-    uniq(fd, argv[r]);
-    close(fd);
-  }
-  exit();
-  }
-} 
+
+    if(!ckfl)
+    {
+        uniq(0, i, c, d);
+        exit();
+    }
+
+    for(j = 1; j < argc; j++)
+    {
+        if(argv[j][0] == '-')
+            continue;
+        else if((fd = open(argv[j], 0)) < 0)
+        {
+            printf(1, "uniq: cannot open file %s\n", argv[j]);
+            exit();
+        }
+        if(c && d)
+            error("both c and d cannot be used simultaneously. sorry, this ain't legal.");
+      printf(1,"Filename: %s\n", argv[j]);
+        uniq(fd, i, c, d);
+        close(fd);
+    }
+    exit();
+}
