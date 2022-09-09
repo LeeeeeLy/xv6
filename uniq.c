@@ -1,47 +1,105 @@
+/*OS6611
+  Assignment 1 Q1
+  Xiaowen Li*/
+
+/* uniq command in Linux is a command-line utility that reports or lters out the repeated lines
+in a le. In simple words, uniq is the tool that helps to detect the adjacent duplicate lines and also
+deletes the duplicate lines. uniq lters out the adjacent matching lines from the input le(that is
+required as an argument) and writes the ltered data to the output le.*/
+
+/*options:
+  -c: count
+  -i: ignore cases
+  -d: repeat*/
+
 #include "types.h"
+#include "stat.h"
 #include "user.h"
 
-#define BUFFER_SIZE 1536
+#define SIZE 1536
 
-/* function prototypes */
-void clear_arr(char *a, int size);
-int getstr(int fd, char *buf, int max);
-char toUpper(char lc);
-int stricmp(const char *p, const char *q);
-void error(char* str);
-void uniq_c(int fd, int i_switch);
-void uniq_d(int fd, int i_switch);
-void uniq_n(int fd, int i_switch);
-void uniq(int fd, int i_switch, int c_switch, int d_switch);
 
-void uniq(int fd, int i_switch, int c_switch, int d_switch)
+/*functions headers*/
+void uniq(int fd, int coption, int ioption, int doption);
+char tolower(unsigned char ch);/*required by strcmpnc*/
+int strcmpnc(const char *p, const char *q);/*comaprison that case does not matter*/
+int getline(int fd, char *buf, int len);
+void inizarr(char *str, int size);
+
+int 
+getline(int fd, char *str, int len)
 {
-    if(c_switch)
-        uniq_c(fd, i_switch);
-    if(d_switch)
-        uniq_d(fd, i_switch);
-    if(!c_switch && !d_switch)
-        uniq_n(fd, i_switch);
+    int i, ro;
+    char letter;
+
+    for(i = 0; i + 1 < len; )
+    {
+      ro = read(fd, &letter, 1);/*read in*/
+      if(ro < 1)
+        return -1;
+      str[i++] = letter;
+      if(letter == '\n' || letter == '\r')
+         break;
+    }
+    str[i] = '\0';/*add to the end*/
+    return strlen(str);
 }
 
-void uniq_c(int fd, int i_switch)
+void 
+inizarr(char *str, int size)
 {
-    char mainstring[BUFFER_SIZE], backup[BUFFER_SIZE];
-    int count = 0, flag = 0;
-    int (*strcmp_f[])(const char *,const char*) = {&strcmp, &stricmp};
+    int i;
 
-    clear_arr(backup, BUFFER_SIZE);
-    clear_arr(mainstring, BUFFER_SIZE);
-    if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+    for(i = 0; i < size; i++)
+        str[i] = '\0';
+}
+
+char
+tolower(unsigned char ch) {
+    if (ch >= 'A' && ch <= 'Z')
+        ch = 'a' + (ch - 'A');
+    return ch;
+}
+
+int strcmpnc(const char * str1, const char * str2)
+{
+    int cpflag = 0;
+
+    while ( *str1 || *str2)
+    {
+        cpflag = tolower((int)(*str1)) - tolower((int)(*str2));
+        if (cpflag != 0)
+        {
+            break;
+        }
+        str1++;
+        str2++;
+    }
+
+    return cpflag;
+}
+
+void
+uniq(int fd, int coption, int ioption, int doption)
+{
+  char str1[SIZE], str2[SIZE];
+  int count = 0;
+  int flag = 0;
+  
+  inizarr(str2, SIZE);
+  inizarr(str1, SIZE);
+
+  if(coption){
+    if(getline(fd, str1, SIZE) <= 0)
         return;
-    strcpy(backup, mainstring);
+    strcpy(str2, str1);
     while(1)
     {
-        while((*strcmp_f[i_switch])(mainstring, backup) == 0)
+        while(strcmp(str1, str2) == 0)
         {
-            clear_arr(mainstring, BUFFER_SIZE);
+            inizarr(str1, SIZE);
             count++;
-            if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+            if(getline(fd, str1, SIZE) <= 0)
             {
                 flag = 1;
                 break;
@@ -49,35 +107,44 @@ void uniq_c(int fd, int i_switch)
         }
         if(flag)
         {
-            printf(1, "%d %s", count, backup);
+            printf(1, "%d %s", count, str2);
             return;
         }
-        printf(1, "%d %s", count, backup);
+        printf(1, "%d %s", count, str2);
         count = 0;
-        strcpy(backup, mainstring);
+        strcpy(str2, str1);
     }
-}
-
-void uniq_d(int fd, int i_switch)
-{
-    char mainstring[BUFFER_SIZE], backup[BUFFER_SIZE];
-    int flag = 0;
-    int (*strcmp_f[])(const char *,const char*) = {&strcmp, &stricmp};
-
-    clear_arr(backup, BUFFER_SIZE);
+  }
+  else if(ioption){
     while(1)
     {
-        clear_arr(mainstring, BUFFER_SIZE);
-        if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+        inizarr(str1, SIZE);
+        if(getline(fd, str1, SIZE) <= 0)
             return;
-        if((*strcmp_f[i_switch])(mainstring, backup) != 0)
-            strcpy(backup, mainstring);
+        while(strcmpnc(str1, str2) == 0)
+        {
+            inizarr(str1, SIZE);
+            if(getline(fd, str1, SIZE) <= 0)
+                return;
+        }
+        printf(1, "%s", str1);
+        strcpy(str2, str1);
+    }
+  }
+  else if(doption){
+    while(1)
+    {
+        inizarr(str1, SIZE);
+        if(getline(fd, str1, SIZE) <= 0)
+            return;
+        if(strcmp(str1, str2) != 0)
+            strcpy(str2, str1);
         else
         {
-            while((*strcmp_f[i_switch])(mainstring, backup) == 0)
+            while(strcmp(str1, str2) == 0)
             {
-                clear_arr(mainstring, BUFFER_SIZE);
-                if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+                inizarr(str1, SIZE);
+                if(getline(fd, str1, SIZE) <= 0)
                 {
                     flag = 1;
                     break;
@@ -85,140 +152,90 @@ void uniq_d(int fd, int i_switch)
             }
             if(flag)
             {
-                printf(1, "%s", backup);
+                printf(1, "%s", str2);
                 return;
             }
-            printf(1, "%s", backup);
-            strcpy(backup, mainstring);
+            printf(1, "%s", str2);
+            strcpy(str2, str1);
         }
     }
-}
 
-void uniq_n(int fd, int i_switch)
-{
-    char mainstring[BUFFER_SIZE], backup[BUFFER_SIZE];
-    int (*strcmp_f[])(const char *,const char*) = {&strcmp, &stricmp};
-
-    clear_arr(backup, BUFFER_SIZE);
+  }
+  else{
     while(1)
     {
-        clear_arr(mainstring, BUFFER_SIZE);
-        if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+        inizarr(str1, SIZE);
+        if(getline(fd, str1, SIZE) <= 0)
             return;
-        while((*strcmp_f[i_switch])(mainstring, backup) == 0)
+        while(strcmp(str1, str2) == 0)
         {
-            clear_arr(mainstring, BUFFER_SIZE);
-            if(getstr(fd, mainstring, BUFFER_SIZE) <= 0)
+            inizarr(str1, SIZE);
+            if(getline(fd, str1, SIZE) <= 0)
                 return;
         }
-        printf(1, "%s", mainstring);
-        strcpy(backup, mainstring);
+        printf(1, "%s", str1);
+        strcpy(str2, str1);
     }
+  }
 }
 
-int getstr(int fd, char *buf, int max)
+
+int
+main(int argc, char *argv[])
 {
-    int i, cc;
-    char c;
+  int fd;
+  int c = 0, i = 0, d = 0;
 
-    for(i = 0; i + 1 < max; )
-    {
-        cc = read(fd, &c, 1);
-        if(cc < 1)
-        return -1;
-    buf[i++] = c;
-    if(c == '\n' || c == '\r')
-         break;
-    }
-
-    buf[i] = '\0';
-    return strlen(buf);
-}
-
-int stricmp(const char *p, const char *q)
-{
-    while(*p && toUpper(*p) == toUpper(*q))
-        p++, q++;
-    return (uchar)*p - (uchar)*q;
-}
-
-char toUpper(char lc)
-{
-    if(lc >= 'a' && lc <= 'z')
-        return lc - ('a' - 'A');
-    else
-        return lc;
-}
-
-void clear_arr(char *a, int size)
-{
-    int i;
-
-    for(i = 0; i < size; i++)
-        a[i] = '\0';
-}
-
-void error(char* str)
-{
-    printf(1, "Error: %s. Terminating\n", str);
+  if(argc <= 1){
+    printf(1,"Too less argument.\n");
     exit();
-}
-
-int main (int argc, char *argv[])
-{
-    int fd, j, ckfl;
-    int i = 0, c = 0, d = 0;
-
-    for(j = 1; j < argc; j++)
-    {
-        if(argv[j][0] == '-')
-        {
-            switch(argv[j][1])
-            {
-                case 'i':
-                    i = 1;
-                    break;
-                case 'd':
-                    d = 1;
-                    break;
-                case 'c':
-                    c = 1;
-                    break;
-                default:
-                    error("Unexpected option, this ain't legal, please try again");
-            }
-        }
+  }
+  if(argc == 2){
+    /*only filename*/ 
+    if((fd = open(argv[1], 0)) < 0){
+      printf(1, "uniq: cannot open %s\n", argv[1]);
+      exit();
     }
-
-    for(j = 1, ckfl = 0; j < argc; j++)
-    {
-        if(argv[j][0] != '-')
-        {
-            ckfl = 1;
-            break;
-        }
+    printf(1,"Filename: %s\n", argv[1]);
+    uniq(fd,c,i,d);
+    close(fd);
+  }
+  if(argc == 3){
+    /*has options*/
+    if(argv[1][0] == '-')
+      {
+          switch(argv[1][1])
+          {
+              case 'i':
+                  i = 1;
+                  break;
+              case 'd':
+                  d = 1;
+                  break;
+              case 'c':
+                  c = 1;
+                  break;
+              default:
+                  printf(1,"Option not suppoted.\n");
+                  exit();
+          }
+      }
+    else{
+      printf(1,"Two arguments were received, the option must goes front of the filename, the option should start with '-'.\n");
+      exit();
     }
-
-    if(!ckfl)
-    {
-        uniq(0, i, c, d);
-        exit();
+            
+    if((fd = open(argv[2], 0)) < 0){
+      printf(1, "uniq: cannot open %s\n", argv[2]);
+      exit();
     }
-
-    for(j = 1; j < argc; j++)
-    {
-        if(argv[j][0] == '-')
-            continue;
-        else if((fd = open(argv[j], 0)) < 0)
-        {
-            printf(1, "uniq: cannot open file %s\n", argv[j]);
-            exit();
-        }
-        if(c && d)
-            error("both c and d cannot be used simultaneously. sorry, this ain't legal.");
-      printf(1,"Filename: %s\n", argv[j]);
-        uniq(fd, i, c, d);
-        close(fd);
-    }
+    printf(1,"Filename: %s\n", argv[2]);
+    uniq(fd,c,i,d);
+    close(fd);  
+  }
+  if(argc > 3){
+    printf(1, "uniq: too many arguments \n");
     exit();
+  } 
+  exit();
 }
