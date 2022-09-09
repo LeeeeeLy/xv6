@@ -29,16 +29,17 @@ void inizarr(char *str, int size);
 int 
 getline(int fd, char *str, int len)
 {
-    int i, ro;
     char letter;
+    int i = 0;
+    int c;
 
-    for(i = 0; i + 1 < len; )
+    while(i++ < en)
     {
-      ro = read(fd, &letter, 1);/*read in*/
-      if(ro < 1)
+      c = read(fd, &letter, 1);/*read in*/
+      if(c < 1)
         return -1;
-      str[i++] = letter;
-      if(letter == '\n' || letter == '\r')
+      str[i] = letter;
+      if(letter == '\n')
          break;
     }
     str[i] = '\0';/*add to the end*/
