@@ -29,17 +29,16 @@ void inizarr(char *str, int size);
 int 
 getline(int fd, char *str, int len)
 {
+    int i, ro;
     char letter;
-    int i = 0;
-    int c;
 
-    while(i++ < len)
+    for(i = 0; i + 1 < len; )
     {
-      c = read(fd, &letter, 1);/*read in*/
-      if(c < 1)
+      ro = read(fd, &letter, 1);/*read in*/
+      if(ro < 1)
         return -1;
-      str[i] = letter;
-      if(letter == '\n')
+      str[i++] = letter;
+      if(letter == '\n' || letter == '\r')
          break;
     }
     str[i] = '\0';/*add to the end*/
@@ -62,7 +61,8 @@ tolower(unsigned char ch) {
     return ch;
 }
 
-int strcmpnc(const char * str1, const char * str2)
+int
+strcmpnc(const char * str1, const char * str2)
 {
     int cpflag = 0;
 
