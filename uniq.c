@@ -33,7 +33,7 @@ getline(int fd, char *str, int len)
     int i = 0;
     int c;
 
-    while(i++ < en)
+    while(i++ < len)
     {
       c = read(fd, &letter, 1);/*read in*/
       if(c < 1)
