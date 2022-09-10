@@ -188,8 +188,7 @@ main(int argc, char *argv[])
   int c = 0, i = 0, d = 0;
 
   if(argc <= 1){
-    printf(1,"Too less argument.\n");
-    exit();
+    uniq(0,c,i,d);
   }
   if(argc == 2){
     /*only filename*/ 
