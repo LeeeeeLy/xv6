@@ -18,25 +18,13 @@ also be used to sort numerically.*/
 
 /*functions headers*/
 int comp(char *str1,char *str2);/*compares two strings with >=<*/
-int aatoi(char *str);/*convert to values*/
 void sortn(char *arr[], int n);/*sort by number(uses atoi)*/
 void sorts(char *arr[], int n);/*sort by string(uses comp)*/
 
 char buf[512];
 char temp[512];
 
-int 
-aatoi(char *str){
-  int i = 0;
-  int val = 0;
 
-  while(str[i] >= '0' && str[i] <= '9'){
-    int nbr = (int) (str[i] - '0');
-    val = (val * 10) + nbr;
-    i++;
-  }
-  return (val);
-}
 
 int 
 comp(char *str1,char *str2){
@@ -71,7 +59,7 @@ sortn(char *arr[], int n){
   for (i = 1; i < n; i++){
     tmp = arr[i];
     j = i - 1;
-    while (j >= 0 && aatoi(arr[j]) > aatoi(tmp)){
+    while (j >= 0 && atoi(arr[j]) > atoi(tmp)){
       arr[j+1] = arr[j];
       j--;
     }

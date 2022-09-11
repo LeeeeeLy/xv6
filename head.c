@@ -14,19 +14,11 @@ without a le, and have it read from standard input*/
 #include "stat.h"
 #include "user.h"
 
+
+/*functions headers*/
+void head(int fd, int line);
+
 char buf[512];
-
-int aatoi(char *str){
-    int i = 0;
-    int val = 0;
-
-    while(str[i] >= '0' && str[i] <= '9'){
-        int nbr = (int) (str[i] - '0');
-        val = (val * 10) + nbr;
-        i++;
-    }
-    return (val);
-}
 
 void
 head(int fd, int line){
@@ -70,7 +62,7 @@ main(int argc, char *argv[]){
         if(argv[1][0] == '-'){
             switch(argv[1][1]){
                 case 'n':
-                nl = aatoi(argv[2]);
+                nl = atoi(argv[2]);
                 break;
                 default:
                 printf(1,"Option not suppoted.\n");
