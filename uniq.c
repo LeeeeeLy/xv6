@@ -4,8 +4,8 @@
 
 /* uniq command in Linux is a command-line utility that reports or lters out the repeated lines
 in a le. In simple words, uniq is the tool that helps to detect the adjacent duplicate lines and also
-deletes the duplicate lines. uniq lters out the adjacent matching lines from the input le(that is
-required as an argument) and writes the ltered data to the output le.*/
+deletes the duplicate lines. uniq filters out the adjacent matching lines from the input file(that is
+required as an argument) and writes the filtered data to the output file.*/
 
 /*options:
   -c: count
@@ -16,52 +16,49 @@ required as an argument) and writes the ltered data to the output le.*/
 #include "stat.h"
 #include "user.h"
 
-#define SIZE 1536
-
 
 /*functions headers*/
 void uniq(int fd, int coption, int ioption, int doption);/*main uniq function, has option c,i,d, and none*/
 char tolower(unsigned char ch);/*required by strcmpnc*/
 int strcmpnc(const char *p, const char *q);/*comaprison that case does not matter*/
-int getline(int fd, char *buf, int len);/*get line*/
-void inizarr(char *str, int size);/*initialize the array with given size*/
+int getline(int fd, char *buf);/*get line*/
+void inizarr(char *str);/*initialize the array with given size*/
 
 int 
-getline(int fd, char *str, int len)
-{
+getline(int fd, char *buf){
   int i, ro;
+  int len = 512;
   char letter;
 
-  for(i = 0; i + 1 < len; ){
+  for(i = 0; i + 1 < len;){
     ro = read(fd, &letter, 1);/*read in*/
     if(ro < 1)
       return -1;
-    str[i++] = letter;
-    if(letter == '\n' || letter == '\r')
+    buf[i++] = letter;
+    if(letter == '\n')
       break;
   }
-  str[i] = '\0';/*add to the end*/
-  return strlen(str);
+  buf[i] = '\0';/*add to the end*/
+  return strlen(buf);
 }
 
 void 
-inizarr(char *str, int size)
-{
+inizarr(char *str){
   int i;
+  int size = 512;
 
   for(i = 0; i < size; i++)
     str[i] = '\0';
 }
 
 char
-tolower(unsigned char ch) {
+tolower(unsigned char ch){
   if (ch >= 'A' && ch <= 'Z')
     ch = 'a' + (ch - 'A');
   return ch;
 }
 
-int strcmpnc(const char * str1, const char * str2)
-{
+int strcmpnc(const char * str1, const char * str2){
   int cpflag = 0;
 
   while ( *str1 || *str2){
@@ -77,29 +74,28 @@ int strcmpnc(const char * str1, const char * str2)
 }
 
 void
-uniq(int fd, int coption, int ioption, int doption)
-{
-  char str1[SIZE], str2[SIZE];
+uniq(int fd, int coption, int ioption, int doption){
+  char str1[512], str2[512];
   int count = 0;
   int flag = 0;
   
-  inizarr(str2, SIZE);
-  inizarr(str1, SIZE);
+  inizarr(str2);
+  inizarr(str1);
 
   if(coption){
-    if(getline(fd, str1, SIZE) <= 0)
+    if(getline(fd, str1) <= 0)
       return;
     strcpy(str2, str1);
     while(1){
       while(strcmp(str1, str2) == 0){
-        inizarr(str1, SIZE);
+        inizarr(str1);
         count++;
-        if(getline(fd, str1, SIZE) <= 0){
+        if(getline(fd, str1) <= 0){
           flag = 1;
           break;
         }
       }
-      if(flag){
+      if(flag){/*last one*/
         printf(1, "%d %s", count, str2);
         return;
       }
@@ -110,12 +106,12 @@ uniq(int fd, int coption, int ioption, int doption)
   }
   else if(ioption){
     while(1){
-      inizarr(str1, SIZE);
-      if(getline(fd, str1, SIZE) <= 0)
+      inizarr(str1);
+      if(getline(fd, str1) <= 0)
           return;
       while(strcmpnc(str1, str2) == 0){
-        inizarr(str1, SIZE);
-        if(getline(fd, str1, SIZE) <= 0)
+        inizarr(str1);
+        if(getline(fd, str1) <= 0)
           return;
       }
       printf(1, "%s", str1);
@@ -124,15 +120,15 @@ uniq(int fd, int coption, int ioption, int doption)
   }
   else if(doption){
     while(1){
-      inizarr(str1, SIZE);
-      if(getline(fd, str1, SIZE) <= 0)
+      inizarr(str1);
+      if(getline(fd, str1) <= 0)
         return;
       if(strcmp(str1, str2) != 0)
         strcpy(str2, str1);
       else{
         while(strcmp(str1, str2) == 0){
-          inizarr(str1, SIZE);
-          if(getline(fd, str1, SIZE) <= 0){
+          inizarr(str1);
+          if(getline(fd, str1) <= 0){
             flag = 1;
             break;
           }
@@ -149,12 +145,12 @@ uniq(int fd, int coption, int ioption, int doption)
   }
   else{
     while(1){
-      inizarr(str1, SIZE);
-      if(getline(fd, str1, SIZE) <= 0)
+      inizarr(str1);
+      if(getline(fd, str1) <= 0)
         return;
       while(strcmp(str1, str2) == 0){
-        inizarr(str1, SIZE);
-        if(getline(fd, str1, SIZE) <= 0)
+        inizarr(str1);
+        if(getline(fd, str1) <= 0)
           return;
       }
       printf(1, "%s", str1);
@@ -165,8 +161,7 @@ uniq(int fd, int coption, int ioption, int doption)
 
 
 int
-main(int argc, char *argv[])
-{
+main(int argc, char *argv[]){
   int fd;
   int c = 0, i = 0, d = 0;
 

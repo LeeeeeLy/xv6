@@ -184,6 +184,7 @@ UPROGS=\
 	_hellow\
 	_uniq\
 	_sort\
+	_head\
 
 fs.img: mkfs README a.txt b.txt $(UPROGS)
 	./mkfs fs.img README a.txt b.txt $(UPROGS)
@@ -254,7 +255,7 @@ EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
 	printf.c umalloc.c\
-	hellow.c\ uniq.c\ sort.c\
+	hellow.c\ uniq.c\ sort.c\ head.c\
 	README a.txt b.txt dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 

@@ -1,144 +1,158 @@
+/*OS6611
+  Assignment 1 Q2
+  Xiaowen Li*/
+
+/* SORT command is used to sort a file, arranging the records in a particular order. By default, the
+sort command sorts file assuming the contents are ASCII. Using options in the sort command can
+also be used to sort numerically.*/
+
+/*options:
+  -r: Sorting in reverse order
+  -o: Write the output to a new file 
+  -n: To sort a file numerically */
+
 #include "types.h"
 #include "stat.h"
 #include "fcntl.h"
 #include "user.h"
 
-char buf[1024];
-char minStr[1024];
-char temp[1024];
+/*functions headers*/
+int comp(char *str1,char *str2);/*compares two strings with >=<*/
+int aatoi(char *str);/*convert to values*/
+void sortn(char *arr[], int n);/*sort by number(uses atoi)*/
+void sorts(char *arr[], int n);/*sort by string(uses comp)*/
 
-int strcompare(char *str1,char *str2){
+char buf[512];
+char temp[512];
 
-    int cmp =-1;
-    int i;
-    if(strcmp(str1,str2) == 0) return 0;
-    for(i = 0; i < strlen(str1); i++){
-        int a = (int) str1[i];
-        int b = (int) str2[i];  
-        //int n = 0;
-        if(a-b == 32 || b-a == 32){
-            if(cmp == -1)
-                cmp = a < b ? 1 : -1; //str2 : str1;
-        }
-        else if (a-b != 0){
-            if(a>=65 && a<97) a = a + 32;
-            if(b>=65 && b<97) b = b + 32;
-            cmp = b < a ? 1 : -1; //str2 : str1;
-            break;
-        }
-    }
-    return cmp;
-}
-       
-void sortStrings(char *arr[], int n){
-    int i, j, min_idx;
+int 
+aatoi(char *str){
+  int i = 0;
+  int val = 0;
 
-    for (i = 0; i < n-1; i++){
-        min_idx = i;
-        strcpy(minStr, arr[i]);
-        for (j = i+1; j < n; j++){
-            //if (strcmp(minStr, arr[j]) > 0)
-            if (strcompare(minStr, arr[j]) > 0){
-                strcpy(minStr, arr[j]);
-                min_idx = j;
-            }
-        }
-
-        if (min_idx != i){
-          strcpy(temp, arr[i]);
-          strcpy(arr[i], arr[min_idx]);
-          strcpy(arr[min_idx], temp);
-        }
-    }
+  while(str[i] >= '0' && str[i] <= '9'){
+    int nbr = (int) (str[i] - '0');
+    val = (val * 10) + nbr;
+    i++;
+  }
+  return (val);
 }
 
-int ft_atoi(char *str){
-    int i = 0;
-    int sign = 1;
-    int val = 0;
-
-    while (str[i] == '-') {
-        sign = -sign;
-        i++;
+int 
+comp(char *str1,char *str2){
+  
+  int i;
+  int bo =-1;
+  int len = strlen(str1);
+  if(strcmp(str1,str2) == 0) 
+    return 0;
+  for(i = 0; i < len; i++){
+    int a = (int) str1[i];
+    int b = (int) str2[i];  
+    if(a-b == 32 || b-a == 32){
+        if(bo == -1)
+            bo = a < b ? 1 : -1; 
     }
-    while(str[i] >= '0' && str[i] <= '9'){
-        int nbr = (int) (str[i] - '0');
-        val = (val * 10) + nbr;
-        i++;
+    else if (a-b != 0){
+        if(a>=65 && a<97) a = a + 32;
+        if(b>=65 && b<97) b = b + 32;
+        bo = b < a ? 1 : -1; 
+        break;
     }
-    return (val * sign);
+  }
+  return bo;
 }
 
-void sortNumbers(char *arr[], int n){
-    int i, j;
-    char *key;
-    for (i = 1; i < n; i++){
-        key = arr[i];
-        j = i - 1;
-        while (j >= 0 && ft_atoi(arr[j]) > ft_atoi(key)){
-            arr[j+1] = arr[j];
-            j = j-1;
-        }
-        arr[j+1] = key;
+void 
+sortn(char *arr[], int n){
+  int i, j;
+  char *tmp;
+
+  for (i = 1; i < n; i++){
+    tmp = arr[i];
+    j = i - 1;
+    while (j >= 0 && aatoi(arr[j]) > aatoi(tmp)){
+      arr[j+1] = arr[j];
+      j--;
     }
+    arr[j+1] = tmp;
+  }
  }
+       
+void 
+sorts(char *arr[], int n){
+  int i, j;
+  int k;
+  char temp2[512];
 
-// void readFromFileAndSort(int fd){
-void sort(int inputfd, int outputfd,int roption,int ooption,int noption){
-    int i = 0;
-    int j = 0;
-    int k = 0;
-    int n;
+  for (i = 0; i < n-1; i++){
+    k = i;
+    strcpy(temp2, arr[i]);
 
-    char *nums[512];
-    char *temp = (char *) malloc(1024*sizeof(char));
-
-    while((n = read(inputfd, buf, sizeof(buf))) > 0){
-        for(i=0; i<n; i++){
-            if(buf[i] != '\n'){
-              temp[j++] = buf[i];
-            }
-            else{
-                nums[k] = temp;
-                temp = (char *) malloc(1024*sizeof(char));
-                j=0;
-                k++;
-            }
-        }
+    for (j = i+1; j < n; j++){
+      if (comp(temp2, arr[j]) > 0){
+        strcpy(temp2, arr[j]);
+        k = j;
+      }
     }
 
-    if(noption == 1)
-        sortNumbers(nums,k);   
+    if (k != i){
+      strcpy(temp, arr[i]);
+      strcpy(arr[i], arr[k]);
+      strcpy(arr[k], temp);
+    }
+  }
+}
+
+void 
+sort(int ifd, int ofd,int roption,int ooption,int noption){
+  int i = 0;
+  int j = 0;
+  int k = 0;
+  int n;
+
+  char *txt[512];
+  char *temp = (char *) malloc(512);
+
+  while((n = read(ifd, buf, sizeof(buf))) > 0){
+    for(i=0; i<n; i++){
+      if(buf[i] != '\n'){
+        temp[j++] = buf[i];
+      }
+      else{
+        txt[k] = temp;
+        temp = (char *) malloc(512);
+        k++;
+
+        j=0;
+      }
+    }
+  }
+  
+  if(roption){ 
+    if(noption)
+      sortn(txt,k);   
     else
-        sortStrings(nums,k);
-
-    //normal
-    if(roption != 1)
-        {
-            for(i = 0 ; i < k ; i++){
-                if(write(outputfd, nums[i], strlen(nums[i])) != strlen(nums[i])) {
-                printf(2, "sort: write error\n");
-                exit();
-                }
-                if(write(outputfd, "\n", 1) != 1) {
-                printf(2, "sort: write error\n");
-                exit();
-                }
-            }   
-        }
-    //reverse
-    if(roption == 1){ 
-        for(i = k-1 ; i >= 0 ; i--){
-            if(write(outputfd, nums[i], strlen(nums[i])) != strlen(nums[i])) {
-                printf(2, "sort: write error\n");
-                exit();
-            }
-            if(write(outputfd, "\n", 1) != 1) {
-                printf(2, "sort: write error\n");
-                exit();
-            }
-        }
+      sorts(txt,k);
+    for(i = k-1 ; i >= 0 ; i--){
+      if(write(ofd, txt[i], strlen(txt[i])) != strlen(txt[i]) || write(ofd, "\n", 1) != 1) {
+        printf(2, "sort: write error\n");
+        exit();
+      }
     }
+  }
+  else{
+    if(noption)
+      sortn(txt,k);   
+    else
+      sorts(txt,k);
+    for(i = 0 ; i < k ; i++){
+      if(write(ofd, txt[i], strlen(txt[i])) != strlen(txt[i]) || write(ofd, "\n", 1) != 1) {
+        printf(2, "sort: write error\n");
+        exit();
+      }
+    } 
+  }
 }
 
 int
@@ -181,8 +195,6 @@ main(int argc, char *argv[]){
       printf(1,"Two arguments were received, the option must goes front of the filename, the option should start with '-'.\n");
       exit();
     }
-
-    printf(1,"switch o is %d\n", o);
 
     /*-o*/   
     if(o){
