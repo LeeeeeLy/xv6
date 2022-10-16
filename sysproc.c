@@ -91,10 +91,14 @@ sys_uptime(void)
 }
 
 // Assignment 3 random number generator 
+//taking ideas from http://www.iro.umontreal.ca/~simardr/rng/lfsr113.c
+
+#define SEED 123456789
+
 int 
 sys_randnum(void)
 {
-  static unsigned int z1 = 12345, z2 = 12345, z3 = 12345, z4 = 12345;
+  static unsigned int z1 = SEED, z2 = SEED, z3 = SEED, z4 = SEED;
   unsigned int b;
   b  = ((z1 << 6) ^ z1) >> 13;
   z1 = ((z1 & 4294967294U) << 18) ^ b;
@@ -105,5 +109,5 @@ sys_randnum(void)
   b  = ((z4 << 3) ^ z4) >> 12;
   z4 = ((z4 & 4294967168U) << 13) ^ b;
 
-  return (z1 ^ z2 ^ z3 ^ z4) / 2;
+  return (z1 ^ z2 ^ z3 ^ z4) * 2.3283064365386963e-10;
 }
