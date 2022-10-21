@@ -6,6 +6,6 @@ int main(void)
 {
     int i = 0;
     i = randnum();
-printf(1, "Random number is: ", i);
+printf(1, "Random number is: %d \n", i);
     exit();
 } 
