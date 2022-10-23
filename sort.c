@@ -99,6 +99,8 @@ sort(int ifd, int ofd,int roption,int ooption,int noption){
   int k = 0;
   int n;
 
+  
+
   char *txt[512];
   char *temp = (char *) malloc(512);
 
@@ -149,6 +151,10 @@ main(int argc, char *argv[]){
   int fs = 0;
   int r = 0, o = 0, n = 0;
 
+  int ut;
+  ut = uptime();
+  printf(1, "up %d ticks\n", ut);
+  
   if(argc <= 1){
     printf(1,"Too less argument.\n");
   }
@@ -208,6 +214,7 @@ main(int argc, char *argv[]){
     close(fo);  
     }
   }
-    
+  ut = uptime();
+  printf(1, "up %d ticks\n", ut);
   exit();
 }

@@ -164,6 +164,9 @@ int
 main(int argc, char *argv[]){
   int fd;
   int c = 0, i = 0, d = 0;
+  int ut;
+	ut = uptime();
+	printf(1, "up %d ticks\n", ut);
 
   if(argc <= 1){
     //printf(1,"Too less argument.\n");
@@ -231,5 +234,7 @@ main(int argc, char *argv[]){
     printf(1, "uniq: too many arguments \n");
     exit();
   } 
+  ut = uptime();
+	printf(1, "up %d ticks\n", ut);
   exit();
 }

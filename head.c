@@ -24,7 +24,7 @@ void
 head(int fd, int line){
     int i, n; 
     int j = 0; 
-
+    int ut;
 
   while((n = read(fd, buf, sizeof(buf))) > 0){
     for(i = 0; i < n ; i++){				
@@ -35,6 +35,8 @@ head(int fd, int line){
       	printf(1,"\n");
       	j++;
         if(j == line){
+          ut = uptime();
+          printf(1, "up %d ticks\n", ut);
             exit();
         }
       } 
@@ -52,6 +54,10 @@ int
 main(int argc, char *argv[]){
     int fd, nl;
     int nf; 
+
+    int ut;
+    ut = uptime();
+    printf(1, "up %d ticks\n", ut);
 
     if (argc <= 1){	
         head(0, 10);	
@@ -77,6 +83,7 @@ main(int argc, char *argv[]){
                 }
                 printf(1,"==> %s <==\n", argv[nf]);
                 head(fd,nl);
+
                 close(fd);
 
             }
@@ -91,11 +98,13 @@ main(int argc, char *argv[]){
                 }
                 printf(1,"==> %s <==\n", argv[nf]);
                 head(fd,nl);
+              
                 close(fd);
 
             }
         }
     }
+
     exit();
 }
 

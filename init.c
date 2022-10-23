@@ -12,12 +12,28 @@ main(void)
 {
   int pid, wpid;
 
+  setp(getpid(), 1);
+
   if(open("console", O_RDWR) < 0){
     mknod("console", 1, 1);
     open("console", O_RDWR);
   }
   dup(0);  // stdout
   dup(0);  // stderr
+
+//3
+  #ifdef DEFAULT
+    printf(1, "Scheduler policy: DEFAULT\n");
+  #else
+  #ifdef PRIORITY
+    printf(1, "Scheduler policy: PRIORITY\n");
+  #else
+  #ifdef FCFS
+    printf(1, "Scheduler policy: FCFS\n");
+  #endif
+  #endif
+  #endif
+//3
 
   for(;;){
     printf(1, "init: starting sh\n");

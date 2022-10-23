@@ -87,8 +87,14 @@ main(int argc, char *argv[]){
     int nl;
     int nf; 
 
+    int ut;
+    ut = uptime();
+    printf(1, "up %d ticks\n", ut);
     if (argc <= 1){	
         tail(0, 10);	
+        ut = uptime();
+        printf(1, "up %d ticks\n", ut);
+
         exit();
     }
     if (argc >= 2){
@@ -106,6 +112,8 @@ main(int argc, char *argv[]){
           for (nf = 3; nf<argc; nf++){   
             printf(1,"==> %s <==\n", argv[nf]);
             tail(argv[nf],nl);
+            ut = uptime();
+            printf(1, "up %d ticks\n", ut);
           }
             
             /*for (nf = 3; nf<argc; nf++){
@@ -136,9 +144,12 @@ main(int argc, char *argv[]){
           for (nf = 1; nf<argc; nf++){
           printf(1,"==> %s <==\n", argv[nf]);
           tail(argv[nf],nl);
+          ut = uptime();
+          printf(1, "up %d ticks\n", ut);
           }
         }
     }
+    
     exit();
 }
 
