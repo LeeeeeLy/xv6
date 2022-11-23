@@ -189,15 +189,17 @@ UPROGS=\
 	_usertests\
 	_wc\
 	_zombie\
-	_hellow\
 	_uniq\
-	_sort\
+	_sort_selection\
+	_sort_bubble\
+	_sort_insertion\
 	_head\
 	_tail\
 	_testrandnum\
 	_ps\
 	_nice\
 	_foo\
+	
 	
 
 fs.img: mkfs README a.txt b.txt $(UPROGS)
@@ -270,7 +272,7 @@ EXTRA=\
 	mkfs.c ulib.c user.h cat.c echo.c forktest.c grep.c kill.c\
 	ln.c ls.c mkdir.c rm.c stressfs.c usertests.c wc.c zombie.c\
 	printf.c umalloc.c\
-	hellow.c\ uniq.c\ sort.c\ head.c\ tail.c\ testrandnum.c\ uptime.c\ ps.c\ foo.c\ nice.c\
+	uniq.c\ sort_selection.c\ sort_bubble.c\ sort_insertion.c\ head.c\ tail.c\ testrandnum.c\ ps.c\ foo.c\ nice.c\
 	README a.txt b.txt dot-bochsrc *.pl toc.* runoff runoff1 runoff.list\
 	.gdbinit.tmpl gdbutil\
 

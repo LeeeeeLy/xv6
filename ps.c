@@ -18,6 +18,7 @@ struct proc {
               // Process totalTickets
   int ctime;
   char name[16];               // Process name
+  int burst_time;
 };
 
 int
@@ -32,7 +33,7 @@ main(int argc, char *argv[]){
     exit();
   }
 
-  printf(1, "PID\t\tPPID\t\tSTATE\t\tPRIORITY\tCPUTIME\t\tCMD\n");
+  printf(1, "PID\t\tPPID\t\tSTATE\t\tPRIORITY\t\tBURSTTIME\tCPUTIME\t\tCMD\n");
   for(p = ptable; p != &ptable[NPROC-1]; p++) {
         if (p->state == UNUSED) continue;
 
@@ -64,6 +65,7 @@ main(int argc, char *argv[]){
   	}
 
     printf(1, "\t%d", p->priority);
+	printf(1, "\t\t%d", p->burst_time);
     printf(1, "\t\t%d", p->ctime);
   	printf(1,"\t\t%s\n", p->name);
   }

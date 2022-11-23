@@ -23,3 +23,5 @@
 #define SYS_getptable 22
 #define SYS_setp 23
 #define SYS_randnum 24
+#define SYS_setbursttime 25
+#define SYS_getbursttime 26

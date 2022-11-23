@@ -93,6 +93,8 @@ found:
   p->priority = 10;
   //3 add time
   p->ctime = ticks;
+  //4 add burst time
+  p->burst_time = 0;
 
 
   release(&ptable.lock);
@@ -430,10 +432,89 @@ scheduler(void)
           c->proc = 0;
         }
         release(&ptable.lock);
+      #else
+
+      #ifdef PRIORITY_FCFS
+        acquire(&ptable.lock);
+        struct proc *highP = 0; 
+        struct proc *p1 = 0;
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+
+          if(p->state != RUNNABLE)
+            continue;
+          
+          highP = p;
+          for(p1 = ptable.proc; p1 < &ptable.proc[NPROC]; p1++){
+            if(p1->state != RUNNABLE)
+              continue;
+            if(highP->priority > p1->priority)
+              highP = p1; 
+            else if(highP->priority == p1->priority){ //if conflicts
+              if(p1->ctime < highP->ctime)//use FCFS
+                highP = p1;
+            }
+          }
+          p = highP;
+          
+          c->proc = p;
+          switchuvm(p);
+          p->state = RUNNING;
+
+          swtch(&(c->scheduler), p->context);
+          switchkvm();
+
+          // Process is done running for now.
+          // It should have changed its p->state before coming back.
+          c->proc = 0;
+        }
+        release(&ptable.lock);
+      #else
+
+      #ifdef PRIORITY_SJF
+        acquire(&ptable.lock);
+        struct proc *highP = 0; 
+        struct proc *p1 = 0;
+        int mint = 10000000;//min brust time
+        for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+
+          if(p->state != RUNNABLE)
+            continue;
+          
+          highP = p;
+          for(p1 = ptable.proc; p1 < &ptable.proc[NPROC]; p1++){
+            if(p1->state != RUNNABLE)
+              continue;
+            if(highP->priority > p1->priority)
+              highP = p1; 
+            else if(highP->priority == p1->priority){ //if conflicts
+               if(mint > p1->burst_time){
+                //updating current process
+                highP = p1;
+                //updating current minimum burst time
+                mint = p1->burst_time;
+            }
+          }
+          p = highP;
+          
+          c->proc = p;
+          switchuvm(p);
+          p->state = RUNNING;
+
+          swtch(&(c->scheduler), p->context);
+          switchkvm();
+
+          // Process is done running for now.
+          // It should have changed its p->state before coming back.
+          c->proc = 0;
+        }
+        release(&ptable.lock);
+
+      #endif
+      #endif
+      #endif
+      #endif
+      #endif
       
-      #endif
-      #endif
-      #endif
   }
 }
 
@@ -635,4 +716,14 @@ setp(int pid, int priority)
   release(&ptable.lock);
 
   return pid;
+}
+
+void setbursttime(int n){
+  argint(0,&n);
+  myproc()->burst_time = n;
+  yield();
+}
+
+int getbursttime(){
+  return myproc()->burst_time;
 }

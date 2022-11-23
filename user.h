@@ -26,6 +26,8 @@ int uptime(void);
 int getptable(int, void *);
 int setp(int, int);
 int randnum(void);
+int setbursttime(int n);
+int getbursttime();
 
 
 // ulib.c

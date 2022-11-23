@@ -106,6 +106,8 @@ extern int sys_uptime(void);
 extern int sys_getptable(void);
 extern int sys_setp(void);
 extern int sys_randnum(void);
+extern int sys_setbursttime(void);
+extern int sys_getbursttime(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -132,6 +134,8 @@ static int (*syscalls[])(void) = {
 [SYS_getptable]   sys_getptable,
 [SYS_setp]    sys_setp,
 [SYS_randnum]    sys_randnum,
+[SYS_setbursttime]   sys_setbursttime,
+[SYS_getbursttime]   sys_getbursttime,
 };
 
 void

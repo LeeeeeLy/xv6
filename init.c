@@ -21,7 +21,8 @@ main(void)
   dup(0);  // stdout
   dup(0);  // stderr
 
-//3
+//3 
+//4
   #ifdef DEFAULT
     printf(1, "Scheduler policy: DEFAULT\n");
   #else
@@ -30,6 +31,14 @@ main(void)
   #else
   #ifdef FCFS
     printf(1, "Scheduler policy: FCFS\n");
+  #else
+  #ifdef PRIORITY_FCFS
+    printf(1, "Scheduler policy: PRIORITY_FCFS\n");
+  #else
+  #ifdef PRIORITY_SJF
+    printf(1, "Scheduler policy: PRIORITY_SJF\n");
+  #endif
+  #endif
   #endif
   #endif
   #endif

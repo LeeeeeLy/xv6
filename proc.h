@@ -53,6 +53,8 @@ struct proc {
   int priority;
   //3 ctime
   uint ctime;
+  //4 brust time
+  int burst_time;              // Burst Time of this Process
 };
 
 // Process memory is laid out contiguously, low addresses first:

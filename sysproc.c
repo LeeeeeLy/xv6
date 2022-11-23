@@ -119,6 +119,8 @@ int sys_getptable(void){
     s+=4;
     *(int *)s = p->priority;
     s+=4;
+    *(int *)s = p->burst_time;
+    s+=4;
     *(int *)s = p->ctime;
     s+=4;
     memmove(s,p->name,16);
@@ -163,4 +165,16 @@ sys_randnum(void)
   z4 = ((z4 & 4294967168U) << 13) ^ b;
 
   return (z1 ^ z2 ^ z3 ^ z4);
+}
+
+int 
+sys_setbursttime(int n){
+  argint(0,&n);
+  setbursttime(n);
+  return 1;
+}
+
+int 
+sys_getbursttime(){
+  return getbursttime();
 }
