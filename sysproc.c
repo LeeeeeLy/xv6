@@ -42,6 +42,7 @@ sys_getpid(void)
   return myproc()->pid;
 }
 
+
 int
 sys_sbrk(void)
 {
@@ -51,10 +52,16 @@ sys_sbrk(void)
   if(argint(0, &n) < 0)
     return -1;
   addr = myproc()->sz;
-  if(growproc(n) < 0)
-    return -1;
+  // 4 
+  //if(growproc(n) < 0)
+  //  return -1;
+  myproc()->sz+=n;
+  if (n < 0) {//deallocate if not enough
+    deallocuvm(myproc()->pgdir, addr, myproc()->sz);
+  }
   return addr;
 }
+
 
 int
 sys_sleep(void)
