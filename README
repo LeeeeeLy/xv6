@@ -1,3 +1,8 @@
 As a part of the project in OS6611.
 
-xv6 system with additional functionalities. 
+xv6 system with 
+Assignment 1 - add additional functionalities to xv6. - sort/uniq/head
+Assignment 2 - add additional functionalitie tail, create a basic shell on your UNIX system
+Assignment 3 - CPU Scheduling
+Assignment -1 - sort with different algorithms and extended functionalities -b/-M/-u
+Assignment 4 - more CPU scheduling, Lazy Allocation
